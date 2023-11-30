@@ -78,7 +78,7 @@ def train(model, criterions, optimizer, scheduler, train_loader, valid_loader, d
 
             valid_acc, valid_f1 = Metrics(y_true.cpu(), pre.cpu())
         
-            if valid_acc > best_acc and valid_f1 > 0:
+            if valid_acc > best_acc:
                 best_acc = valid_acc
                 f1 = valid_f1
                 torch.save(model.state_dict(), 'checkpoint/' + task + '/Fold_' + str(fold) + '_best_acc.pth')
