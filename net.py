@@ -20,15 +20,6 @@ class FeedForward(nn.Module):
         x = self.net(x)
         x = self.norm(x)
         return x
-    
-class MyLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers):
-        super(MyLSTM, self).__init__()
-        self.lstm = nn.Sequential(nn.LSTM(input_size, hidden_size, num_layers, batch_first=True))
-
-    def forward(self, x):
-        out, (h, c) = self.lstm(x)
-        return out
 
 class MCLSTM(nn.Module):
     def __init__(self, input_size1, input_size2, hidden_size, num_layers, dropout):
@@ -36,8 +27,8 @@ class MCLSTM(nn.Module):
         self.hidden_size = hidden_size
         self.linear1 = nn.Linear(input_size1, hidden_size)
         self.linear2 = nn.Linear(input_size2, hidden_size)
-        self.shared_lstm1 = MyLSTM(hidden_size, hidden_size, num_layers)
-        self.shared_lstm2 = MyLSTM(hidden_size, hidden_size, num_layers)
+        self.shared_lstm1 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
+        self.shared_lstm2 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, eeg, face):
@@ -135,10 +126,11 @@ class net(nn.Module):
         super().__init__()
         self.num_classes = num_classes
         self.mc_lstm = MCLSTM(eeg_dim, face_dim, hidden_size, num_layers, dropout)
-        self.eeg_subnet = EegSubNet(eeg_dim, hidden_size, num_layers, dropout, dim, heads, dim_head, mlp_dim)
-        self.face_subnet = FaceSubNet(face_dim, hidden_size, num_layers, dropout, dim, heads, dim_head, mlp_dim)
+        self.eeg_subnet = EegSubNet(dropout, dim, heads, dim_head, mlp_dim)
+        self.face_subnet = FaceSubNet(dropout, dim, heads, dim_head, mlp_dim)
         self.Regression = RegressionSubNetwork(dim)
         self.Classification = ClassificationSubNetwork(dim, num_classes)
+        self.FeedForward = FeedForward(mlp_dim, dim, dropout)
         self.fc = nn.Linear(mlp_dim, num_classes)
         
     def confidence_loss(self, TCPLogit, TCPConfidence, label):
@@ -167,6 +159,7 @@ class net(nn.Module):
         face = face * TCPConfidence_face
         
         feature = torch.cat([eeg, face], dim=1)
+        feature = self.FeedForward(feature)
         Logit = self.fc(feature)
         
         c_loss_eeg = self.confidence_loss(TCPLogit_eeg, TCPConfidence_eeg, label)
