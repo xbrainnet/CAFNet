@@ -6,7 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class FeedForward(nn.Module):
-    def __init__(self, dim, hidden_dim, dropout):
+    def __init__(self, 
+                 dim, 
+                 hidden_dim, 
+                 dropout):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, hidden_dim),
@@ -22,7 +25,12 @@ class FeedForward(nn.Module):
         return x
 
 class MCLSTM(nn.Module):
-    def __init__(self, input_size1, input_size2, hidden_size, num_layers, dropout):
+    def __init__(self, 
+                 input_size1, 
+                 input_size2, 
+                 hidden_size, 
+                 num_layers, 
+                 dropout):
         super(MCLSTM, self).__init__()
         self.hidden_size = hidden_size
         self.linear1 = nn.Linear(input_size1, hidden_size)
@@ -47,7 +55,10 @@ class MCLSTM(nn.Module):
         return eeg, face
     
 class Attention(nn.Module):
-    def __init__(self, dim, dim_head, heads):
+    def __init__(self, 
+                 dim, 
+                 dim_head, 
+                 heads):
         super(Attention, self).__init__()
         self.to_Q = nn.Linear(dim, dim_head * heads, bias=False)
         self.to_K = nn.Linear(dim, dim_head * heads, bias=False)
@@ -71,7 +82,9 @@ class Attention(nn.Module):
         return out
 
 class LinearLayer(nn.Module):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, 
+                 in_dim, 
+                 out_dim):
         super().__init__()
         self.clf = nn.Sequential(nn.Linear(in_dim, out_dim))
 
@@ -80,7 +93,12 @@ class LinearLayer(nn.Module):
         return x
 
 class EegSubNet(nn.Module):
-    def __init__(self, dropout, dim, heads, dim_head, mlp_dim):
+    def __init__(self, 
+                 dropout, 
+                 dim, 
+                 heads, 
+                 dim_head, 
+                 mlp_dim):
         super(EegSubNet, self).__init__()
         self.SelfAttention = Attention(dim, heads, dim_head)
         self.FeedForward = FeedForward(dim, mlp_dim, dropout)
@@ -91,7 +109,12 @@ class EegSubNet(nn.Module):
         return x
 
 class FaceSubNet(nn.Module):
-    def __init__(self, dropout, dim, heads, dim_head, mlp_dim):
+    def __init__(self, 
+                 dropout, 
+                 dim, 
+                 heads, 
+                 dim_head, 
+                 mlp_dim):
         super(FaceSubNet, self).__init__()
         self.SelfAttention = Attention(dim, heads, dim_head)
         self.FeedForward = FeedForward(dim, mlp_dim, dropout)
@@ -102,7 +125,8 @@ class FaceSubNet(nn.Module):
         return x
     
 class RegressionSubNetwork(nn.Module):
-    def __init__(self, mlp_dim):
+    def __init__(self, 
+                 mlp_dim):
         super(RegressionSubNetwork, self).__init__()
         self.layers = nn.ModuleList([LinearLayer(mlp_dim, 1)])
 
@@ -112,7 +136,9 @@ class RegressionSubNetwork(nn.Module):
         return x
 
 class ClassificationSubNetwork(nn.Module):
-    def __init__(self, mlp_dim, num_classes):
+    def __init__(self, 
+                 mlp_dim, 
+                 num_classes):
         super(ClassificationSubNetwork, self).__init__()
         self.layers = nn.ModuleList([LinearLayer(mlp_dim, num_classes)])
 
@@ -122,7 +148,17 @@ class ClassificationSubNetwork(nn.Module):
         return x
 
 class net(nn.Module):  
-    def __init__(self, eeg_dim, face_dim, hidden_size, num_layers, dim, heads, dim_head, mlp_dim, num_classes, dropout):
+    def __init__(self, 
+                 eeg_dim, 
+                 face_dim, 
+                 hidden_size, 
+                 num_layers, 
+                 dim, 
+                 heads, 
+                 dim_head, 
+                 mlp_dim, 
+                 num_classes, 
+                 dropout):
         super().__init__()
         self.num_classes = num_classes
         self.mc_lstm = MCLSTM(eeg_dim, face_dim, hidden_size, num_layers, dropout)
