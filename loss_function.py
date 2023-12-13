@@ -15,7 +15,7 @@ class MySpl_loss(nn.CrossEntropyLoss):
 		super_loss = nn.functional.cross_entropy(input, target, reduction='none') + self.alpha * c_loss + self.beta * kd_loss
 		v = self.spl_loss(super_loss)
 		self.v[index] = v
-		return (super_loss).mean()
+		return (super_loss * v).mean()
 
 	def increase_threshold(self):
 		self.spl_lambda *= self.spl_gamma
