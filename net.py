@@ -35,8 +35,7 @@ class MCLSTM(nn.Module):
         self.hidden_size = hidden_size
         self.linear1 = nn.Linear(input_size1, hidden_size)
         self.linear2 = nn.Linear(input_size2, hidden_size)
-        self.shared_lstm1 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
-        self.shared_lstm2 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
+        self.shared_lstm = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, eeg, face):
@@ -47,8 +46,8 @@ class MCLSTM(nn.Module):
         c_e = torch.zeros((1, eeg.size(0), self.hidden_size), dtype=eeg.dtype, device=eeg.device)
         c_f = torch.zeros((1, face.size(0), self.hidden_size), dtype=face.dtype, device=face.device)
 
-        eeg, _ = self.shared_lstm1(eeg, (h, c_e))
-        face, _ = self.shared_lstm2(face, (h, c_f))
+        eeg, _ = self.shared_lstm(eeg, (h, c_e))
+        face, _ = self.shared_lstm(face, (h, c_f))
 
         eeg = self.dropout(eeg)
         face = self.dropout(face)
