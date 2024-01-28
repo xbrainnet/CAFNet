@@ -1,8 +1,8 @@
 # CAFNet
 
-This repository contains the code of paper "Dynamic Confidence-Aware Multi-Modal Emotion Recognition". The DEAP dataset can be download through link "https://www.eecs.qmul.ac.uk/mmv/datasets/deap/download.html".
+This repository contains the code of the paper "Dynamic Confidence-Aware Multi-Modal Emotion Recognition". The DEAP dataset can be downloaded through the link "https://www.eecs.qmul.ac.uk/mmv/datasets/deap/download.html".
 
-## Requirment
+## Requirement
 * Python 3
 * Pytorch 1.8.0
 * sklearn
